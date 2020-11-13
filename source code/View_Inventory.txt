@@ -121,31 +121,31 @@ class Application:
         a = Toplevel()
         a.title('Activity Log')
         a.geometry("500x500")
-
-        # Update Microsoft Excel Spreadsheet Function
-        df2 = pd.DataFrame(columns=["EmployeeID", "Description", "Time"])
-
-        def updateExcel(x, y, z):
-            d = [[x, y, z]]
-            df3 = pd.DataFrame(d)
-            df2.append(df3)
-            with pd.ExcelWriter("C:\\Users\Jordan\Desktop\Project\Activity.xlsx") as writer:
+        count=0
+    
+        #Update Microsoft Excel Spreadsheet Function
+        def updateExcel(x,y,z):
+            global count
+            d=[[x,y,z]]
+            df2.loc[count]=[x,y,z]
+            with pd.ExcelWriter('C:\\Users\CHR5S\Desktop\Activity.xlsx') as writer:
                 df2.to_excel(writer)
-
-        df = pd.read_excel("C:\\Users\Jordan\Desktop\Project\Activity.xlsx")
-        activityLabel = Label(a, text=df).grid(row=0, column=0)
-        employee = StringVar()
-        description = StringVar()
-        time = StringVar()
-        elabel = Label(a, text="Employee ID").grid(row=3, column=0)
-        dlabel = Label(a, text="Description").grid(row=4, column=0)
-        tlabel = Label(a, text="Time").grid(row=5, column=0)
-        e = Entry(a, textvariable=employee, width=20).grid(row=3, column=1)
-        d = Entry(a, textvariable=description, width=20).grid(row=4, column=1)
-        t = Entry(a, textvariable=time, width=20).grid(row=5, column=1)
-        update_button = Button(a, text="Update",
-                               command=lambda: updateExcel(employee.get(), description.get(), time.get()))
-        update_button.grid(row=6, column=0)
+            count+=1
+        
+        df2=pd.DataFrame(columns=['EmployeeID','Description','Time'])    
+        df = pd.read_excel('C:\\Users\CHR5S\Desktop\Activity.xlsx')
+        activityLabel = Label(a,text=df).grid(row=0,column=0)
+        employee=StringVar()
+        description=StringVar()
+        time=StringVar()
+        elabel=Label(a,text="Employee ID").grid(row=3,column=0)
+        dlabel=Label(a,text="Description").grid(row=4,column=0)
+        tlabel=Label(a,text="Time").grid(row=5,column=0)
+        e=Entry(a,textvariable=employee,width=20).grid(row=3,column=1)
+        d=Entry(a,textvariable=description,width=20).grid(row=4,column=1)
+        t=Entry(a,textvariable=time,width=20).grid(row=5,column=1)
+        update_button=Button(a,text="Update",command=lambda: updateExcel(employee.get(),description.get(),time.get()))
+        update_button.grid(row=6,column=0)
 
     def Employee():
         e = Tk()
