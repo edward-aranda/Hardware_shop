@@ -15,7 +15,8 @@ supervisors = []
 hw_path="C:\\Users\CHR5S\Desktop\Hardware.xlsx"
 activity_path="C:\\Users\CHR5S\Desktop\Activity.xlsx"
 backup_path="C:\\Users\CHR5S\Desktop\Backup.xlsx"
-cs_path="C:\\Users\CHR5S\Desktop\Customer Survey.xlsx"
+cs_path="C:\\Users\CHR5S\Desktop\Customer_Survey.xlsx"
+dept_path="C:\\Users\CHR5S\Desktop\Departments.xlsx"
 
 count=0
 class Login(Frame):
@@ -34,7 +35,7 @@ class Login(Frame):
                 for obj in employees: 
                         if obj.id == x:
                             if obj.password == y:
-                                Employee(root)
+                                Employee(root,"Employee")
                             else:       
                                 invalid = Label(master,text="Invalid Login.",fg='red').place(relx=.5,rely=.8,anchor=CENTER)
                         else:       
@@ -63,29 +64,41 @@ class Login(Frame):
         
         
         
-class AdminSupervisorDelete(Frame):
+class AdminSupervisorEdit(Frame):
     def __init__(self,master):
-        master.title("Delete Supervisor")
+        master.title("Edit Employee")
         master.geometry("500x500")
-        def logOutBar():
+        for widget in master.winfo_children():
+            widget.destroy()
+        def edit(a,b,c,d,e):
+            for obj in supervisors: 
+                if obj.id == a:
+                    obj.name=b
+                    obj.addr=c
+                    obj.phone=d
+                    obj.password=e
             Login(root)
         def goHome():
             Admin(root)
-        for widget in master.winfo_children():
-            widget.destroy()
-        def deletes(x):
-            for obj in supervisors: 
-                if obj.id == x:
-                    supervisors.remove(obj)
+        def logOutBar():
             Login(root)
-        username2=StringVar()
-        usr_lbl = Label(master, text="ID: ")
-        usr_lbl.place(relx=.3, rely=.4, anchor=CENTER)
-        usr_text = Entry(master,textvariable=username2, width=20)
-        usr_text.place(relx=.5, rely=.4, anchor=CENTER)
-        deleteSupervisor = Button(master, text="Delete Supervisor",command =lambda:deletes(username2.get()))
-        deleteSupervisor.place(relx=.3, rely=.6, anchor=CENTER)
-        
+        new_id=StringVar()
+        new_name=StringVar()
+        new_address=StringVar()
+        new_phone=StringVar()
+        new_password=StringVar()
+        IDLabel = Label(master, text= "ID:").grid(column=0,row=0)
+        NameLabel=Label(master,text="Name:").grid(column=0,row=1)
+        AddrLabel=Label(master,text="Address:").grid(column=0,row=2)
+        PhoneLabel=Label(master,text="Phone:").grid(column=0,row=3)
+        PwdLabel=Label(master,text="Password:").grid(column=0,row=4)
+        IDEntry=Entry(master,textvariable=new_id).grid(column=1,row=0)
+        NameEntry=Entry(master,textvariable=new_name).grid(column=1,row=1)
+        AddressEntry=Entry(master,textvariable=new_address).grid(column=1,row=2)
+        PhoneEntry=Entry(master,textvariable=new_phone).grid(column=1,row=3)
+        PasswordEntry=Entry(master,textvariable=new_password).grid(column=1,row=4)
+        submit = Button(master, text= "Edit Supervisor",command=lambda:edit(new_id.get(),new_name.get(),
+                                                                            new_address.get(),new_phone.get(),new_password.get())).grid(column=0,row=5)
         #Employee menu bar
         menubar = Menu(master)
         goHomeMenu = Menu(menubar, tearoff=0)
@@ -106,7 +119,7 @@ class AdminSupervisorView(Frame):
         for widget in master.winfo_children():
             widget.destroy()
         for obj in supervisors: 
-            labelx=Label(master,text=obj.id).pack() 
+            labelx=Label(master,text=obj.id + ", "+ obj.name + ", "+obj.addr+ ", "+obj.phone).pack() 
         #Employee menu bar
         menubar = Menu(master)
         goHomeMenu = Menu(menubar, tearoff=0)
@@ -181,6 +194,8 @@ class AdminSupervisorAdd(Frame):
         logoutMenu.add_command(label = "Log Out",command=logOutBar)
         menubar.add_cascade(label="Log Out",menu=logoutMenu)
         master.config(menu=menubar)
+        
+#Substitute Supervisor Edit for Supervisor delete like we have in employee
 class AdminSupervisor(Frame):
     def __init__(self,master):
         master.title("Edit Supervisor")
@@ -193,15 +208,15 @@ class AdminSupervisor(Frame):
             AdminSupervisorView(root)
         def adminSupervisorAdd():
             AdminSupervisorAdd(root)
-        def adminSupervisorDelete():
-            AdminSupervisorDelete(root)
+        def adminSupervisorEdit():
+            AdminSupervisorEdit(root)
         for widget in master.winfo_children():
             widget.destroy()
         view = Button(master,text = "View",command=adminSupervisorView,width=30,height=5 )
         view.place(relx=.5, rely=.2, anchor=CENTER)
         add=Button(master,text = "Add",command=adminSupervisorAdd,width=30,height=5)
         add.place(relx=.5,rely=.5,anchor = CENTER)
-        delete=Button(master,text="Delete",command=adminSupervisorDelete,width=30,height=5)
+        delete=Button(master,text="Edit",command=adminSupervisorEdit,width=30,height=5)
         delete.place(relx=.5,rely=.8,anchor=CENTER)
         #Employee menu bar
         menubar = Menu(master)
@@ -257,7 +272,7 @@ class AdminEmployeeView(Frame):
         for widget in master.winfo_children():
             widget.destroy()
         for obj in employees: 
-            labelx=Label(master,text=obj.id).pack() 
+            labelx=Label(master,text=obj.id + ", "+obj.name + ", "+obj.addr + ", "+obj.phone).pack() 
         #Employee menu bar
         menubar = Menu(master)
         goHomeMenu = Menu(menubar, tearoff=0)
@@ -333,8 +348,51 @@ class AdminEmployeeAdd(Frame):
         logoutMenu = Menu(menubar, tearoff=0)
         logoutMenu.add_command(label = "Log Out",command=logOutBar)
         menubar.add_cascade(label="Log Out",menu=logoutMenu)
-        master.config(menu=menubar)       
-        
+        master.config(menu=menubar)
+  #Does not change phone number     
+class AdminEmployeeEdit(Frame):
+     def __init__(self,master):
+        master.title("Edit Employee")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        def edit(a,b,c,d,e):
+            for obj in employees: 
+                if obj.id == a:
+                    obj.name=b
+                    obj.addr=c
+                    obj.phone=d
+                    obj.password=e
+            Login(root)
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+        new_id=StringVar()
+        new_name=StringVar()
+        new_address=StringVar()
+        new_phone=StringVar()
+        new_password=StringVar()
+        IDLabel = Label(master, text= "ID:").grid(column=0,row=0)
+        NameLabel=Label(master,text="Name:").grid(column=0,row=1)
+        AddrLabel=Label(master,text="Address:").grid(column=0,row=2)
+        PhoneLabel=Label(master,text="Phone:").grid(column=0,row=3)
+        PwdLabel=Label(master,text="Password:").grid(column=0,row=4)
+        IDEntry=Entry(master,textvariable=new_id).grid(column=1,row=0)
+        NameEntry=Entry(master,textvariable=new_name).grid(column=1,row=1)
+        AddressEntry=Entry(master,textvariable=new_address).grid(column=1,row=2)
+        PhoneEntry=Entry(master,textvariable=new_phone).grid(column=1,row=3)
+        PasswordEntry=Entry(master,textvariable=new_password).grid(column=1,row=4)
+        submit = Button(master, text= "Edit Employee",command=lambda:edit(new_id.get(),new_name.get(),new_address.get(),new_phone.get(),new_password.get())).grid(column=0,row=5)
+        #Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label = "Home",command=goHome)
+        menubar.add_cascade(label="Home",menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label = "Log Out",command=logOutBar)
+        menubar.add_cascade(label="Log Out",menu=logoutMenu)
+        master.config(menu=menubar)
 class AdminEmployee(Frame):
     def __init__(self,master):
         master.title("Edit Employee")
@@ -349,14 +407,20 @@ class AdminEmployee(Frame):
             AdminEmployeeAdd(root)
         def adminEmployeeDelete():
             AdminEmployeeDelete(root)
+        def adminEmployeeEdit():
+            AdminEmployeeEdit(root)
         for widget in master.winfo_children():
             widget.destroy()
         view = Button(master,text = "View",command=adminEmployeeView,width=30,height=5 )
         view.place(relx=.5, rely=.2, anchor=CENTER)
         add=Button(master,text = "Add",command=adminEmployeeAdd,width=30,height=5)
         add.place(relx=.5,rely=.5,anchor = CENTER)
-        delete=Button(master,text="Delete",command=adminEmployeeDelete,width=30,height=5)
-        delete.place(relx=.5,rely=.8,anchor=CENTER)
+        #Delete could possible be just a scenario of edit
+        #May possibly delete adminEmployeeDelete class
+        #delete=Button(master,text="Delete",command=adminEmployeeDelete,width=30,height=5)
+        #delete.place(relx=.5,rely=.8,anchor=CENTER)
+        edit=Button(master,text="Edit",command=adminEmployeeEdit,width=30,height=5)
+        edit.place(relx=.5,rely=.8,anchor=CENTER)
         #Employee menu bar
         menubar = Menu(master)
         goHomeMenu = Menu(menubar, tearoff=0)
@@ -378,29 +442,13 @@ class AdminBackup(Frame):
             widget.destroy()
         def createBackup():
             df=pd.read_excel(hw_path,sheet_name="Hardware")
-            df2=pd.read_excel(hw_path,sheet_name="Electrical")
-            df3=pd.read_excel(hw_path,sheet_name="Plumbing")
-            df4=pd.read_excel(hw_path,sheet_name="Flooring")
-            df5=pd.read_excel(hw_path,sheet_name="Lumber")
             with pd.ExcelWriter(backup_path) as writer:  
                 df.to_excel(writer,sheet_name="Hardware")
-                df2.to_excel(writer,sheet_name="Electrical")
-                df3.to_excel(writer,sheet_name="Plumbing")
-                df4.to_excel(writer,sheet_name="Flooring")
-                df5.to_excel(writer,sheet_name="Lumber")
                 backupCreated=Label(master,text="Backup Created").pack()
         def restoreBackup():
             df=pd.read_excel(backup_path,sheet_name="Hardware")
-            df2=pd.read_excel(backup_path,sheet_name="Electrical")
-            df3=pd.read_excel(backup_path,sheet_name="Plumbing")
-            df4=pd.read_excel(backup_path,sheet_name="Flooring")
-            df5=pd.read_excel(backup_path,sheet_name="Lumber")
             with pd.ExcelWriter(hw_path) as writer:  
                 df.to_excel(writer,sheet_name="Hardware")
-                df2.to_excel(writer,sheet_name="Electrical")
-                df3.to_excel(writer,sheet_name="Plumbing")
-                df4.to_excel(writer,sheet_name="Flooring")
-                df5.to_excel(writer,sheet_name="Lumber")
                 backupCreated=Label(master,text="Restored from backup").pack()
         view = Button(master,text = "Create",command=createBackup,width=30,height=5 )
         view.place(relx=.5, rely=.2, anchor=CENTER)
@@ -415,6 +463,15 @@ class AdminBackup(Frame):
         logoutMenu.add_command(label = "Log Out",command=logOutBar)
         menubar.add_cascade(label="Log Out",menu=logoutMenu)
         master.config(menu=menubar)
+class AdminInventoryUpdate(Frame):
+    def __init__(self,master):
+        master.title("Update Inventory")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        #Possibly a label where you can search by department and view all products
+        #Row where ID equals entry ID
+        #In that column, set visible to false
 class AdminInventory(Frame):
     def __init__(self,master):
         master.title("Edit Inventory")
@@ -425,14 +482,17 @@ class AdminInventory(Frame):
             Departments(root,"Admin")
         def goHome():
             Admin(root)
+        def updateInventory():
+            AdminInventoryUpdate(root)
         for widget in master.winfo_children():
             widget.destroy()
+        #Adding functions for Update and Delete Inventory
+        #
         view = Button(master,text = "View",command=viewInventory,width=30,height=5 )
         view.place(relx=.5, rely=.2, anchor=CENTER)
-        add=Button(master,text = "Add",width=30,height=5)
+        add=Button(master,text = "Update",command=updateInventory,width=30,height=5)
         add.place(relx=.5,rely=.5,anchor = CENTER)
-        delete=Button(master,text="Delete",width=30,height=5)
-        delete.place(relx=.5,rely=.8,anchor=CENTER)
+        
         #Employee menu bar
         menubar = Menu(master)
         goHomeMenu = Menu(menubar, tearoff=0)
@@ -442,6 +502,126 @@ class AdminInventory(Frame):
         logoutMenu.add_command(label = "Log Out",command=logOutBar)
         menubar.add_cascade(label="Log Out",menu=logoutMenu)
         master.config(menu=menubar)
+class AdminDepartmentCreate(Frame):
+    def __init__(self,master):
+        master.title("Edit Departments")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        departmentName = StringVar()
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+        def creates(x):
+            df=pd.read_excel(dept_path)
+            num = len(df)
+            df.loc[num, 'Name']=x
+            df.loc[num, 'ID']=num + 1
+            df.loc[num, 'Visible']=True
+            with pd.ExcelWriter(dept_path) as writer:
+                df.to_excel(writer)
+            Admin(root)
+        l = Label(master, text="Department name:")
+        l.place(relx=.2,rely=.3)
+        e= Entry(master,textvariable=departmentName)
+        e.place(relx=.5,rely=.3)
+        create = Button(master, text = "Create Department",command=lambda:creates(departmentName.get()))
+        create.place(relx=.3,rely=.5)
+        #Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label = "Home",command=goHome)
+        menubar.add_cascade(label="Home",menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label = "Log Out",command=logOutBar)
+        menubar.add_cascade(label="Log Out",menu=logoutMenu)
+        master.config(menu=menubar)
+
+class AdminDepartmentDelete(Frame):
+    def __init__(self,master):
+        master.title("Delete Departments")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+        
+        #Write an algorithm that sets the Visible value of the selected Department to False
+        def deletes(x):
+            df=pd.read_excel(dept_path)
+            #look for row containing bathroom
+            for index, row in df.iterrows():
+                if row['Name'] ==x:
+                    df.loc[index,'Visible']=False
+
+
+                
+            with pd.ExcelWriter(dept_path) as writer:
+                df.to_excel(writer)
+            Admin(root)
+            
+            
+        departmentName=StringVar()
+        l = Label(master, text="Department name:")
+        l.place(relx=.2,rely=.3)
+        e= Entry(master,textvariable=departmentName)
+        e.place(relx=.5,rely=.3)
+        create = Button(master, text = "Delete Department",command=lambda:deletes(departmentName.get()))
+        create.place(relx=.3,rely=.5)
+            
+        #Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label = "Home",command=goHome)
+        menubar.add_cascade(label="Home",menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label = "Log Out",command=logOutBar)
+        menubar.add_cascade(label="Log Out",menu=logoutMenu)
+        master.config(menu=menubar)
+class AdminDepartment(Frame):
+     def __init__(self,master):
+        master.title("Edit Departments")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+        def createDepartment():
+            AdminDepartmentCreate(root)
+        def deleteDepartment():
+            AdminDepartmentDelete(root)
+        #Basic Home Screen Configuration
+        employee = Button(master,text = "Create",command=createDepartment,width=30,height=5 )
+        employee.place(relx=.5, rely=.2, anchor=CENTER)
+        departments=Button(master,text = "Delete",command=deleteDepartment,width=30,height=5)
+        departments.place(relx=.5,rely=.5,anchor = CENTER)
+         #Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label = "Home",command=goHome)
+        menubar.add_cascade(label="Home",menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label = "Log Out",command=logOutBar)
+        menubar.add_cascade(label="Log Out",menu=logoutMenu)
+        master.config(menu=menubar)
+#Where do we keep our transactions?
+#Transactions is its own spreadsheet
+#Transactions has a transactionID, dollar amount, and date
+class AdminTransactions(Frame):
+    def __init__(self,master):
+        master.title("Transactions")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        employee = Button(master,text = "View",width=30,height=5 )
+        employee.place(relx=.5, rely=.2, anchor=CENTER)
+        departments=Button(master,text = "Delete",width=30,height=5)
+        departments.place(relx=.5,rely=.5,anchor = CENTER)
 class Admin(Frame):
     def __init__(self,master):
         master.title("Admin")
@@ -453,10 +633,14 @@ class Admin(Frame):
             AdminSupervisor(root)
         def backupBar():
             AdminBackup(root)
+        def transactionsBar():
+            AdminTransactions(root)
         def employeeBar():
             AdminEmployee(root)
         def inventoryBar():
             AdminInventory(root)
+        def departmentBar():
+            AdminDepartment(root)
         def logOutBar():
             Login(root)
         def employee():
@@ -482,6 +666,12 @@ class Admin(Frame):
         logoutMenu = Menu(menubar, tearoff=0)
         logoutMenu.add_command(label = "Log Out",command=logOutBar)
         menubar.add_cascade(label="Log Out",menu=logoutMenu)
+        departmentMenu = Menu(menubar, tearoff=0)
+        departmentMenu.add_command(label = "Department",command=departmentBar)
+        menubar.add_cascade(label="Department",menu=departmentMenu)
+        transactionsMenu = Menu(menubar, tearoff=0)
+        transactionsMenu.add_command(label = "Transactions",command=transactionsBar)
+        menubar.add_cascade(label="Transactions",menu=transactionsMenu)
         master.config(menu=menubar)
         #Basic Home Screen Configuration
         employee = Button(master,text = "Employee",command=employee,width=30,height=5 )
@@ -681,6 +871,11 @@ class EmployeeCustomerSatisfaction(Frame):
         master.geometry("500x500")
         for widget in master.winfo_children():
             widget.destroy()
+        #Delete customer satisfaction rating
+        def Cancel_Survey():
+            Employee(root,"Employee")
+        def logOutBar():
+            Login(root)
         def Update_Survey():
             global wb
             wb = Workbook()
@@ -716,7 +911,10 @@ class EmployeeCustomerSatisfaction(Frame):
             if(user_Input3.get()== 'No'):
                 cell3= ws['C4']
                 ws["C4"]= cell3.value+1
-
+            
+            #Customer Satisfaction Survey should display score
+            print(cell1.value+cell2.value+cell3.value)
+            
             wb.save(cs_path)
                 
                 # HEY EDWARD LOOK RIGHT HERE
@@ -724,7 +922,8 @@ class EmployeeCustomerSatisfaction(Frame):
                 # LOOK AT ME BABY
                 # ASK CHRISPOFJET TO NAVIGATE BACK TO EMPLOYEE
                 # ALSO THIS CODE IS STOOOPID
-
+            
+            
         ttk.Label(master, text="Did you find what you were looking for?").grid(column=0, row=5, padx=10, pady=25)
         ttk.Label(master, text="Did you enjoy your visit today?").grid(column=0, row=15, padx=10, pady=25)
         ttk.Label(master, text="Would you recommend us to a friend?").grid(column=0, row=25, padx=10, pady=25)
@@ -752,6 +951,11 @@ class EmployeeCustomerSatisfaction(Frame):
 
         Survey_Button = Button(master, text="Submit",command=Update_Survey)
         Survey_Button.place(relx=.5,rely=.5,anchor=CENTER)
+        Cancel_Button = Button(master, text="Cancel",command=Cancel_Survey)
+        Cancel_Button.place(relx=.7,rely=.5,anchor=CENTER)
+        
+        #Customer Satisfaction Survey needs ID of current employee
+        
         #Employee menu bar
         menubar = Menu(master)
         logoutMenu = Menu(menubar, tearoff=0)
@@ -910,7 +1114,7 @@ class Departments(Frame):
         menubar.add_cascade(label="Log Out",menu=logoutMenu)
         master.config(menu=menubar)
 class Activity_Log():
-    def __init__(self,master):
+    def __init__(self,master,who):
         master.title("Activity Log")
         master.geometry("500x500")
         for widget in master.winfo_children():
@@ -922,6 +1126,8 @@ class Activity_Log():
                 Supervisor(root)
             else:
                 Employee(root)
+        def logOutBar():
+            Login(root)
          #Update Microsoft Excel Spreadsheet Function
         def updateExcel(x,y,z):
             #Get Size of Activity Log and start count at len(activity_size)
@@ -945,6 +1151,13 @@ class Activity_Log():
         t=Entry(master,textvariable=time,width=20).grid(row=5,column=1)
         update_button=Button(master,text="Update",command=lambda: updateExcel(employee.get(),description.get(),time.get()))
         update_button.grid(row=6,column=0)
+        #Implement function to clear the activity log
+        if who=="Admin":
+            def delete():
+                df = pd.DataFrame([[], [], []])
+                with pd.ExcelWriter(activity_path) as writer:
+                    df.to_excel(writer)
+            delete_Buton=Button(master,text="Delete Activity Log",command=delete).grid(row=7,column=0)
         #Employee menu bar
         menubar = Menu(master)
         goHomeMenu = Menu(menubar, tearoff=0)
