@@ -2,6 +2,7 @@ from tkinter import *
 import pandas as pd
 from numpy import random
 
+import openpyxl as xl
 from openpyxl.workbook import Workbook
 from openpyxl import load_workbook
 from tkinter import ttk
@@ -12,14 +13,14 @@ admins = {"": ""}
 employees = []
 supervisors = []
 
-hw_path = "C:\\Users\edwar\Downloads\Hardware.xlsx"
-activity_path = "C:\\Users\edwar\Downloads\Activity.xlsx"
-backup_path = "C:\\Users\edwar\Downloads\Backup.xlsx"
-cs_path = "C:\\Users\edwar\Downloads\Customer Survey.xlsx"
-dept_path = "C:\\Users\edwar\Downloads\Departments.xlsx"
+hw_path = "Hardware.xlsx"
+activity_path = "Activity.xlsx"
+backup_path = "Backup.xlsx"
+cs_path = "Customer Survey.xlsx"
+dept_path = "Departments.xlsx"
 
 count = 0
-
+labels = []
 
 class Login(Frame):
     def __init__(self, master):
@@ -533,16 +534,60 @@ class AdminBackup(Frame):
             widget.destroy()
 
         def createBackup():
-            df = pd.read_excel(hw_path, sheet_name="Hardware")
-            with pd.ExcelWriter(backup_path) as writer:
-                df.to_excel(writer, sheet_name="Hardware")
-                backupCreated = Label(master, text="Backup Created").pack()
-
+            wb1 = xl.load_workbook(hw_path)
+            wb2=xl.load_workbook(backup_path)
+            def writeToExcel(wb1,ws1,wb2,ws2,mr,mc):
+                # copying the cell values from source  
+                # excel file to destination excel file 
+                for i in range (1, mr + 1): 
+                    for j in range (1, mc + 1): 
+                        # reading cell value from source excel file 
+                        c = ws1.cell(row = i, column = j) 
+  
+                        # writing the read value to destination excel file 
+                        ws2.cell(row = i, column = j).value = c.value 
+  
+                # saving the destination excel file 
+                wb2.save(str(backup_path)) 
+                
+            for index in range(0,5):
+                ws1 = wb1.worksheets[index]
+                ws2 = wb2.worksheets[index]
+                mr = ws1.max_row
+                mc = ws1.max_column
+                writeToExcel(wb1,ws1,wb2,ws2,mr,mc)
+            completed = Label(master, text = "Backup created").pack()
+            
+                
+                
+                    
         def restoreBackup():
-            df = pd.read_excel(backup_path, sheet_name="Hardware")
-            with pd.ExcelWriter(hw_path) as writer:
-                df.to_excel(writer, sheet_name="Hardware")
-                backupCreated = Label(master, text="Restored from backup").pack()
+            wb1 = xl.load_workbook(backup_path)
+            wb2 = xl.load_workbook(hw_path)
+            
+            def writeToExcel(wb1,ws1,wb2,ws2,mr,mc):
+                # copying the cell values from source  
+                # excel file to destination excel file 
+                for i in range (1, mr + 1): 
+                    for j in range (1, mc + 1): 
+                        # reading cell value from source excel file 
+                        c = ws1.cell(row = i, column = j) 
+  
+                        # writing the read value to destination excel file 
+                        ws2.cell(row = i, column = j).value = c.value 
+  
+                # saving the destination excel file 
+                wb2.save(str(hw_path)) 
+            
+            for index in range(0,5):
+                ws1 = wb1.worksheets[index]
+                ws2 = wb2.worksheets[index]
+                mr = ws1.max_row
+                mc = ws1.max_column
+                writeToExcel(wb1,ws1,wb2,ws2,mr,mc)
+            complete = Label(master, text = "Restored from backup").pack()
+            
+            
 
         view = Button(master, text="Create", command=createBackup, width=30, height=5)
         view.place(relx=.5, rely=.2, anchor=CENTER)
@@ -570,7 +615,7 @@ class AdminInventoryUpdate(Frame):
             widget.destroy()
         wb = Workbook()
         wb = load_workbook(hw_path)
-
+        labels = []
         def up_Hardware():
             wb.active = 0
             ws = (wb.active)
@@ -578,7 +623,7 @@ class AdminInventoryUpdate(Frame):
             global column_b
             column_a = ws['A']
             column_b = ws['B']
-            get_info()
+            get_info(wb.active)
 
         def up_Electrical():
             wb.active = 1
@@ -587,7 +632,7 @@ class AdminInventoryUpdate(Frame):
             global column_b
             column_a = ws['A']
             column_b = ws['B']
-            get_info()
+            get_info(wb.active)
 
         def up_Plumbing():
             wb.active = 2
@@ -596,7 +641,7 @@ class AdminInventoryUpdate(Frame):
             global column_b
             column_a = ws['A']
             column_b = ws['B']
-            get_info()
+            get_info(wb.active)
 
         def up_Flooring():
             wb.active = 3
@@ -605,7 +650,7 @@ class AdminInventoryUpdate(Frame):
             global column_b
             column_a = ws['A']
             column_b = ws['B']
-            get_info()
+            get_info(wb.active)
 
         def up_Lumber():
             wb.active = 4
@@ -614,36 +659,40 @@ class AdminInventoryUpdate(Frame):
             global column_b
             column_a = ws['A']
             column_b = ws['B']
-            get_info()
-
-        def get_info():
-            get_a()
-            label_a.place(relx=.5, rely=.2, anchor=CENTER)
-
-        def get_a():
+            get_info(wb.active)
+        
+        def printCell(x,y):
+            #x is a list of entries, y is the active workbook
+            for col in y.iter_cols(min_col=2,max_col=2):
+                for i,cell in enumerate(col):
+                    #print(str(i)+ ": " + str(cell.value))
+                    for index,entry in enumerate(x):
+                        if(i==index):
+                            cell.value=entry.get()
+            wb.save(hw_path)
+        def get_info(x):
+            for label in labels:
+                label.destroy()
+            #print("Active workbook is " + str(x))
             list = ''
-            newQuantity = StringVar()
+            entries = []
             for index, cell in enumerate(column_a,start=0):
                 list = f' {list + str(cell.value)}\n'
-                if cell.value == "Hammer":
-                    newInventory = Label(master,text="How many?: ")
-                    newInventory.place(relx=.8, rely=.5, anchor=CENTER)
-                    newInventory2 = Entry(master, textvariable=newQuantity).pack()
-                    column_b[index].value = newQuantity
-                    print(column_b[index].value)
-            label_a.config(text=list)
+                newInventory = Label(master,text=cell.value)
+                newInventory.grid(row=index,column=2)
+                labels.append(newInventory)
+                newInventory2 = Entry(master)
+                newInventory2.grid(row=index,column=3)
+                newInventory2.insert(0,column_b[index].value)
+                entries.append(newInventory2)
+            btn = Button(master, text = "Update",command=lambda:printCell(entries,x)).grid(row=10,column=2)
 
-        Hardware_Button = Button(master, text="Update Hardware", command=up_Hardware)
-        Hardware_Button.place(relx=.15, rely=.1, anchor=CENTER)
-        Electrical_Button = Button(master, text="UpdateElectrical", command=up_Electrical)
-        Electrical_Button.place(relx=.15, rely=.2, anchor=CENTER)
-        Plumbing_Button = Button(master, text="Update Plumbing", command=up_Plumbing)
-        Plumbing_Button.place(relx=.15, rely=.3, anchor=CENTER)
-        Flooring_Button = Button(master, text="Update Flooring", command=up_Flooring)
-        Flooring_Button.place(relx=.15, rely=.4, anchor=CENTER)
-        Lumber_Button = Button(master, text="Update Lumber", command=up_Lumber)
-        Lumber_Button.place(relx=.15, rely=.5, anchor=CENTER)
-        label_a = Label(master, text="")
+        Hardware_Button = Button(master, text="Update Hardware", command=up_Hardware).grid(row=0,column=0)
+        Electrical_Button = Button(master, text="Update Electrical", command=up_Electrical).grid(row=1,column=0)
+        Plumbing_Button = Button(master, text="Update Plumbing", command=up_Plumbing).grid(row=2,column=0)
+        Flooring_Button = Button(master, text="Update Flooring", command=up_Flooring).grid(row=3,column=0)
+        Lumber_Button = Button(master, text="Update Lumber", command=up_Lumber).grid(row=4,column=0)
+
 
 class AdminInventory(Frame):
     def __init__(self, master):
