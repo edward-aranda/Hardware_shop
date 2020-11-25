@@ -1745,17 +1745,3 @@ class Activity_Log():
 
 app = Login(root)
 root.mainloop()
-
-        # Employee menu bar
-        menubar = Menu(master)
-        goHomeMenu = Menu(menubar, tearoff=0)
-        goHomeMenu.add_command(label="Home", command=goHome)
-        menubar.add_cascade(label="Home", menu=goHomeMenu)
-        logoutMenu = Menu(menubar, tearoff=0)
-        logoutMenu.add_command(label="Log Out", command=logOutBar)
-        menubar.add_cascade(label="Log Out", menu=logoutMenu)
-        master.config(menu=menubar)
-
-
-app = Login(root)
-root.mainloop()
