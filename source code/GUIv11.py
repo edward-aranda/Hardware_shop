@@ -6,6 +6,7 @@ import openpyxl as xl
 from openpyxl.workbook import Workbook
 from openpyxl import load_workbook
 from tkinter import ttk
+from tkinter.ttk import Notebook,Entry
 
 root = Tk()
 
@@ -18,6 +19,7 @@ activity_path = "Activity.xlsx"
 backup_path = "Backup.xlsx"
 cs_path = "Customer Survey.xlsx"
 dept_path = "Departments.xlsx"
+transactions_path="transactions.xlsx"
 
 count = 0
 labels = []
@@ -851,21 +853,156 @@ class AdminDepartment(Frame):
         master.config(menu=menubar)
 
 
-# Where do we keep our transactions?
-# Transactions is its own spreadsheet
-# Transactions has a transactionID, dollar amount, and date
+class AdminTransactionsView(Frame):
+    def __init__(self, master):
+        master.title("Transactions")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+         
+        
+        frame2=Frame(root)
+        frame2.pack(fill="both")
+
+        tablayout=Notebook(frame2)
+        #tab1
+        tab1=Frame(tablayout)
+        tab1.pack(fill="both")
+            
+        df = pd.read_excel(transactions_path,converters={'ID': lambda x: str(x)})
+        
+        if 'Visible' in df.columns:
+            df = df[df['Visible']==True]
+            df = df.drop(['Visible'], axis=1)
+        
+        for row in range(df.shape[0] + 1):
+            for column in range(df.shape[1]):
+                if row==0:
+                    label = Label(tab1, text=df.columns.values[column], bg="cyan", fg="black")
+                    label.config(font=('Arial bold',10))
+                    label.grid(row=row, column=column, sticky="nsew", padx=1, pady=1)
+                    tab1.grid_columnconfigure(column, weight=1)
+                else:
+                    label=Label(tab1, text=df.iloc[row-1, column], bg="white", fg="black")
+                    label.grid(row=row,column=column,sticky="nsew",padx=1,pady=1)
+                    tab1.grid_columnconfigure(column,weight=1)
+        
+        tablayout.pack(fill="both")
+        
+        # Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label="Home", command=goHome)
+        menubar.add_cascade(label="Home", menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label="Log Out", command=logOutBar)
+        menubar.add_cascade(label="Log Out", menu=logoutMenu)
+        master.config(menu=menubar)
+        
+        
+class AdminTransactionsDelete(Frame):
+    def __init__(self, master):
+        master.title("Transactions")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+        def deleteTransactionID(x):
+            wb = Workbook()
+            wb = load_workbook(transactions_path)
+            wb.active = 0
+            ws = (wb.active)
+           
+            for j in range(1,12):
+                if ws.cell(row=j,column=1).value == x:
+                    ws.cell(row=j, column=4).value = False
+                    wb.save(transactions_path)
+                    AdminTransactionsDelete(root)
+                else:
+                    pass
+                    
+                    
+        frame2=Frame(root)
+        frame2.pack(fill="both")
+
+        tablayout=Notebook(frame2)
+        #tab1
+        tab1=Frame(tablayout)
+        tab1.pack(fill="both")
+            
+        df = pd.read_excel(transactions_path,converters={'ID': lambda x: str(x)})
+        
+        if 'Visible' in df.columns:
+            df = df[df['Visible']==True]
+            df = df.drop(['Visible'], axis=1)
+        
+        for row in range(df.shape[0] + 1):
+            for column in range(df.shape[1]):
+                if row==0:
+                    label = Label(tab1, text=df.columns.values[column], bg="cyan", fg="black")
+                    label.config(font=('Arial bold',10))
+                    label.grid(row=row, column=column, sticky="nsew", padx=1, pady=1)
+                    tab1.grid_columnconfigure(column, weight=1)
+                else:
+                    label=Label(tab1, text=df.iloc[row-1, column], bg="white", fg="black")
+                    label.grid(row=row,column=column,sticky="nsew",padx=1,pady=1)
+                    tab1.grid_columnconfigure(column,weight=1)
+        
+        tablayout.pack(fill="both")
+        
+        deleteID = IntVar()
+        e = Entry(master, textvariable = deleteID)
+        e.place(relx=.5, rely=.6, anchor=CENTER)
+        l = Label (master, text = "Delete Transaction ID: ")
+        l.place(relx=.2, rely=.6, anchor=CENTER)
+        b = Button(master, text="Delete",command=lambda:deleteTransactionID(deleteID.get()))
+        b.place(relx=.2, rely=.7, anchor=CENTER)
+        # Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label="Home", command=goHome)
+        menubar.add_cascade(label="Home", menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label="Log Out", command=logOutBar)
+        menubar.add_cascade(label="Log Out", menu=logoutMenu)
+        master.config(menu=menubar)
 class AdminTransactions(Frame):
     def __init__(self, master):
         master.title("Transactions")
         master.geometry("500x500")
         for widget in master.winfo_children():
             widget.destroy()
-        employee = Button(master, text="View", width=30, height=5)
+        #Generate 100 dates, IDs, and dollar amounts
+        def transactionsView():
+            AdminTransactionsView(root)
+        def transactionsDelete():
+            AdminTransactionsDelete(root)
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+        employee = Button(master, text="View",command=transactionsView, width=30, height=5)
         employee.place(relx=.5, rely=.2, anchor=CENTER)
-        departments = Button(master, text="Delete", width=30, height=5)
+        departments = Button(master, text="Delete",command=transactionsDelete, width=30, height=5)
         departments.place(relx=.5, rely=.5, anchor=CENTER)
 
 
+        # Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label="Home", command=goHome)
+        menubar.add_cascade(label="Home", menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label="Log Out", command=logOutBar)
+        menubar.add_cascade(label="Log Out", menu=logoutMenu)
+        master.config(menu=menubar)
 class Admin(Frame):
     def __init__(self, master):
         master.title("Admin")
@@ -1415,7 +1552,57 @@ class Departments(Frame):
         menubar.add_cascade(label="Log Out", menu=logoutMenu)
         master.config(menu=menubar)
 
+class viewActivityLog():
+    def __init__(self, master):
+        master.title("View Activity Log")
+        master.geometry("500x500")
+        for widget in master.winfo_children():
+            widget.destroy()
+        def goHome():
+            Admin(root)
+        def logOutBar():
+            Login(root)
+         
+        
+        frame2=Frame(root)
+        frame2.pack(fill="both")
 
+        tablayout=Notebook(frame2)
+        #tab1
+        tab1=Frame(tablayout)
+        tab1.pack(fill="both")
+            
+        df = pd.read_excel(activity_path,converters={'ID': lambda x: str(x)})
+        
+        if 'Visible' in df.columns:
+            df = df[df['Visible']==True]
+            df = df.drop(['Visible'], axis=1)
+        
+        for row in range(df.shape[0] + 1):
+            for column in range(df.shape[1]):
+                if row==0:
+                    label = Label(tab1, text=df.columns.values[column], bg="cyan", fg="black")
+                    label.config(font=('Arial bold',10))
+                    label.grid(row=row, column=column, sticky="nsew", padx=1, pady=1)
+                    tab1.grid_columnconfigure(column, weight=1)
+                else:
+                    label=Label(tab1, text=df.iloc[row-1, column], bg="white", fg="black")
+                    label.grid(row=row,column=column,sticky="nsew",padx=1,pady=1)
+                    tab1.grid_columnconfigure(column,weight=1)
+        
+        tablayout.pack(fill="both")
+        
+        # Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label="Home", command=goHome)
+        menubar.add_cascade(label="Home", menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label="Log Out", command=logOutBar)
+        menubar.add_cascade(label="Log Out", menu=logoutMenu)
+        master.config(menu=menubar)
+        
+        
 class Activity_Log():
     def __init__(self, master, who):
         master.title("Activity Log")
@@ -1538,10 +1725,26 @@ class Activity_Log():
                 df = pd.DataFrame([[], [], []])
                 with pd.ExcelWriter(activity_path) as writer:
                     df.to_excel(writer)
-                deleted = Label(master, text="Activity Log Cleared").grid(row=1, column=5, padx=10, pady=25)
-
+            
             delete_Buton = Button(master, text="Delete Activity Log", command=delete).grid(row=50, column=10, padx=10,
                                                                                            pady=25)
+        
+        def view():
+            viewActivityLog(root)
+        view = Button(master, text = "View Activity Log",command=view).grid(row = 55, column = 10, padx=10, pady=25)
+        # Employee menu bar
+        menubar = Menu(master)
+        goHomeMenu = Menu(menubar, tearoff=0)
+        goHomeMenu.add_command(label="Home", command=goHome)
+        menubar.add_cascade(label="Home", menu=goHomeMenu)
+        logoutMenu = Menu(menubar, tearoff=0)
+        logoutMenu.add_command(label="Log Out", command=logOutBar)
+        menubar.add_cascade(label="Log Out", menu=logoutMenu)
+        master.config(menu=menubar)
+
+
+app = Login(root)
+root.mainloop()
 
         # Employee menu bar
         menubar = Menu(master)
